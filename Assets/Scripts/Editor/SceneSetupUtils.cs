@@ -44,6 +44,7 @@ namespace ShiftMagicSpell.Editor
             ArtCatalogBuildUtils.Build();
             ViewAssetSetupUtils.Setup();
             PrefabSetupUtils.CreateMissing();
+            HitFeedbackSetupUtils.ApplyFlashMaterialToPrefabs(HitFeedbackSetupUtils.SetupFlashMaterial());
             BuildMainScene();
         }
 
@@ -64,6 +65,7 @@ namespace ShiftMagicSpell.Editor
             var pools = new GameObject("FxPools");
             pools.transform.SetParent(world.transform, false);
             HudView hud = HudSetupUtils.BuildHud();
+            HitEdgeView hitEdge = HitFeedbackSetupUtils.BuildHitEdge(hud.gameObject);
             ScreensView screens = HudSetupUtils.BuildScreens();
 
             var game = new GameObject("Game");
@@ -82,6 +84,7 @@ namespace ShiftMagicSpell.Editor
                 ("_bulletPrefab", AssetDatabase.LoadAssetAtPath<SpriteRenderer>(PrefabSetupUtils.BULLET_PATH)),
                 ("_floatTextPrefab", AssetDatabase.LoadAssetAtPath<PixelText>(PrefabSetupUtils.FLOAT_TEXT_PATH)),
                 ("_hud", hud),
+                ("_hitEdge", hitEdge),
                 ("_screens", screens));
             var serialized = new SerializedObject(renderer);
             SerializedProperty boards = serialized.FindProperty("_boards");

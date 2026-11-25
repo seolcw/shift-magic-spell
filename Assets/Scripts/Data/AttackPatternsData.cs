@@ -18,6 +18,9 @@ namespace ShiftMagicSpell.Data
         public List<SpellDef> Spells = new List<SpellDef>();
         public List<AttackDef> Attacks = new List<AttackDef>();
 
+        [Tooltip("타격감: 멈춤·흔들림·번쩍임·넉백·조각·소리 세기 (Unity에서 추가, 웹 JSON에 없음)")]
+        public HitFeelValues HitFeel = new HitFeelValues();
+
         private Dictionary<string, SpellDef> _spellDict;
         private Dictionary<string, AttackDef> _attackDict;
 

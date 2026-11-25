@@ -18,12 +18,14 @@ namespace ShiftMagicSpell.Core
         public readonly GameRandom Random;
         public readonly List<FxEvent> Fx = new List<FxEvent>();
 
+        /// <summary>타격감(멈춤·흔들림·번쩍임·넉백·빨간 테두리). 화면 흔들림도 여기 있다.</summary>
+        public readonly HitFeedback Feel;
+
         public GameStats Stats = new GameStats();
         public int Phase;
         public GameState State = GameState.Ready;
         public float Time;
         public float StateT;
-        public float Shake;
         public TimedText Toast;
         public TimedText Banner;
         public bool IsInvincible;
@@ -46,12 +48,21 @@ namespace ShiftMagicSpell.Core
         public float LastFireTime;
         public int LastFireCombo;
 
-        // 마법이 손에 닿는 순간까지 남은 시간(닿으면 손이 움찔하고 화면이 흔들림)
-        private float _spellHitT;
+        // 날아가는 중인 마법들. 손에 닿는 순간 타격감을 건다. 콤보는 앞 마법이 닿기 전에 다음 마법을 쏠 수 있어서 목록으로 둔다.
+        private readonly List<PendingSpellHit> _pendingSpellHits = new List<PendingSpellHit>();
+
+        private class PendingSpellHit
+        {
+            public float T;
+            public HitKind Kind;
+            public Vector2 From;
+            public Color Color;
+        }
 
         public GameSession(AttackPatternsData data, BoardLayoutData layout, int seed)
         {
             Data = data;
+            Feel = new HitFeedback(this);
             Random = new GameRandom(seed);
             Boards = new[] { new BoardModel(0, layout), new BoardModel(1, layout) };
             Player = new PlayerController(this);
@@ -130,7 +141,8 @@ namespace ShiftMagicSpell.Core
             Words.Refresh();
             Fx.Clear();
             LastFireBoard = -1;
-            _spellHitT = 0f;
+            _pendingSpellHits.Clear();
+            Feel.Reset();
             FinisherIntroT = 0f;
             State = GameState.Play;
             IsPaused = false;
@@ -186,9 +198,14 @@ namespace ShiftMagicSpell.Core
         {
             GameStats.Increment(Stats.Hits, source);
             LastHitSource = source;
-            Shake = 0.3f;
             Vector2 center = GeometryUtils.CellCenter(Player.Board, Player.R, Player.C);
             Fx.Add(new FxEvent { Kind = FxKind.Float, From = center - new Vector2(0f, 0.4f), Text = "-1", Color = PaletteUtils.Hp, T = 0.9f, Duration = 0.9f });
+
+            // 타격감: 손이 있는 쪽에서 맞아 반대쪽으로 밀린다. 마지막 HP면 더 세게.
+            HitKind kind = Player.Hp <= 0 ? HitKind.PlayerDeath : HitKind.PlayerHurt;
+            Vector2 away = GetDirection(Hand.Pos, center, Vector2.down);
+            Feel.Hit(kind, away);
+            AddDebris(kind, center, away, PaletteUtils.Player, "player");
             if (Player.Hp <= 0)
             {
                 State = GameState.Dead;
@@ -286,10 +303,14 @@ namespace ShiftMagicSpell.Core
             return LastFireBoard == board && Time - LastFireTime <= Config.ComboWindow;
         }
 
-        /// <summary>마법 발동: 피해 = 글자 수 × 배율(반올림, 최소 1). 손은 맞은 뒤 잠깐 멈춘다. 준 피해를 돌려준다.</summary>
+        /// <summary>
+        /// 마법 발동: 피해 = 글자 수 × 배율(반올림, 최소 1). 손은 맞은 뒤 잠깐 멈춘다. 준 피해를 돌려준다.
+        /// 타격감 세기는 배율로 정한다: 마무리 SHIFT, 1보다 크면 콤보, 1보다 작으면 넘침(80%), 1이면 보통.
+        /// </summary>
         public int CastSpell(string word, Vector2 from, float multiplier)
         {
             bool isFinisher = word == Data.FinisherWord;
+            HitKind hitKind = isFinisher ? HitKind.Finisher : multiplier > 1f ? HitKind.Combo : multiplier < 1f ? HitKind.Overflow : HitKind.Spell;
             SpellDef spell = Data.GetSpellOrNull(word);
             // 웹(Math.round)과 같이 .5는 올린다
             int damage = Mathf.Max(1, Mathf.FloorToInt(word.Length * multiplier + 0.5f));
@@ -327,7 +348,7 @@ namespace ShiftMagicSpell.Core
                 Duration = 1.3f,
                 Delay = duration * 0.55f,
             });
-            _spellHitT = duration * 0.55f;
+            _pendingSpellHits.Add(new PendingSpellHit { T = duration * 0.55f, Kind = hitKind, From = from, Color = color });
             if (Hand.Hp <= 0)
             {
                 // 한 판 끝: 진행 중인 예고·탄·공격은 모두 거둔다(전환·승리 화면 동안 공격 없음, 플레이어는 상태가 Play가 아니라 무적)
@@ -349,9 +370,16 @@ namespace ShiftMagicSpell.Core
                 return;
             }
 
+            // 타격감은 실제 시간으로 흐르고, 멈춤(히트스톱) 동안에는 로직 전체(시간·연출·손·플레이어)를 세운다.
+            // 멈춘 동안 누른 입력은 PlayerController가 예약해 두었다가 멈춤이 끝나면 실행한다.
+            Feel.Update(dt);
+            if (Feel.IsHitStopped)
+            {
+                return;
+            }
+
             Time += dt;
             UpdateFx(dt);
-            Shake = Mathf.Max(0f, Shake - dt);
             if (Toast != null && (Toast.T -= dt) <= 0f)
             {
                 Toast = null;
@@ -362,11 +390,7 @@ namespace ShiftMagicSpell.Core
                 Banner = null;
             }
 
-            if (_spellHitT > 0f && (_spellHitT -= dt) <= 0f)
-            {
-                Shake = Mathf.Max(Shake, 0.25f);
-                Hand.SetAnim(HandController.ANIM_HURT);
-            }
+            UpdatePendingSpellHits(dt);
 
             switch (State)
             {
@@ -424,6 +448,60 @@ namespace ShiftMagicSpell.Core
         {
             FinisherIntroT = Config.FinisherIntroTime;
             Hand.CancelAttack(Config.FinisherIntroTime + Config.PhaseFirstAttackDelay);
+        }
+
+        /// <summary>
+        /// 타격감 조각 연출을 남긴다. style: player(분홍 조각), hand(흰 조각 + 마법 색 별), block(블록 조각).
+        /// dir = 조각이 주로 튀는 방향(맞은 쪽이 밀리는 방향).
+        /// </summary>
+        public void AddDebris(HitKind kind, Vector2 position, Vector2 dir, Color color, string style)
+        {
+            int count = Data.HitFeel.Get(kind).Debris;
+            if (count <= 0)
+            {
+                return;
+            }
+
+            const float DEBRIS_TIME = 0.5f;
+            Fx.Add(new FxEvent
+            {
+                Kind = FxKind.Debris,
+                From = position,
+                To = dir,
+                Color = color,
+                Count = count,
+                Style = style,
+                Seed = Random.Range(0f, 1000f),
+                T = DEBRIS_TIME,
+                Duration = DEBRIS_TIME,
+            });
+        }
+
+        /// <summary>from → to 방향(길이 1). 두 점이 거의 같으면 fallback.</summary>
+        public static Vector2 GetDirection(Vector2 from, Vector2 to, Vector2 fallback)
+        {
+            Vector2 delta = to - from;
+            return delta.sqrMagnitude > 0.0001f ? delta.normalized : fallback;
+        }
+
+        // 마법이 손에 닿는 순간: 손이 움찔하고(Hurt), 날아온 방향으로 밀리며 번쩍이고 조각이 튄다
+        private void UpdatePendingSpellHits(float dt)
+        {
+            for (int i = _pendingSpellHits.Count - 1; i >= 0; i--)
+            {
+                PendingSpellHit hit = _pendingSpellHits[i];
+                hit.T -= dt;
+                if (hit.T > 0f)
+                {
+                    continue;
+                }
+
+                _pendingSpellHits.RemoveAt(i);
+                Vector2 push = GetDirection(hit.From, Hand.Pos, Vector2.up);
+                Hand.SetAnim(HandController.ANIM_HURT);
+                Feel.Hit(hit.Kind, push);
+                AddDebris(hit.Kind, Hand.Pos, push, hit.Color, "hand");
+            }
         }
 
         private void UpdateBoards(float dt)

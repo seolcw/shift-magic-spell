@@ -443,7 +443,7 @@ namespace ShiftMagicSpell.Core
                     }
 
                     AddImpact(attack);
-                    _game.Shake = 0.25f;
+                    _game.Feel.Hit(HitKind.Slam, Vector2.down);
                     State = HandState.Exec;
                     _execT = 0f;
                     break;
@@ -473,7 +473,7 @@ namespace ShiftMagicSpell.Core
                     }
 
                     AddImpact(attack);
-                    _game.Shake = 0.2f;
+                    _game.Feel.Hit(HitKind.Slam, Vector2.down);
                     ToIdle();
                     break;
                 case AttackType.Slot:
@@ -540,7 +540,14 @@ namespace ShiftMagicSpell.Core
             {
                 block.Hp--;
                 block.HitT = 0.4f;
-                if (block.Hp <= 0)
+                bool isBroken = block.Hp <= 0;
+                HitKind kind = isBroken ? HitKind.BlockBreak : HitKind.BlockChip;
+                HitFeelLevel level = _game.Data.HitFeel.Get(kind);
+                block.FlashT = Mathf.Max(level.FlashTime, level.HitStop) * _game.Data.HitFeel.FlashScale;
+                _game.Feel.Hit(kind, Vector2.down);
+                SpellDef spell = _game.Data.GetSpellOrNull(block.Word);
+                _game.AddDebris(kind, GeometryUtils.CellCenter(attack.Board, attack.Slot.R, attack.Slot.C), Vector2.down, spell != null ? spell.Color : PaletteUtils.Glow, "block");
+                if (isBroken)
                 {
                     attack.Slot.Block = null;
                     _game.Fx.Add(FxEvent.AtCell(FxKind.Fizzle, attack.Board, attack.Slot.R, attack.Slot.C, 0.5f));
@@ -548,9 +555,12 @@ namespace ShiftMagicSpell.Core
                     _game.Stats.BlocksLost++;
                 }
             }
+            else
+            {
+                _game.Feel.Hit(HitKind.Slam, Vector2.down);
+            }
 
             _game.Fx.Add(new FxEvent { Kind = FxKind.Click, From = attack.Center, T = 0.25f, Duration = 0.25f });
-            _game.Shake = 0.15f;
             ToIdle();
         }
 

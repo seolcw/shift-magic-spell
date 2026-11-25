@@ -7,5 +7,8 @@ namespace ShiftMagicSpell.Core
         public int Hp;
         public float Age;
         public float HitT;
+
+        // 손에게 맞아 하얗게 번쩍이는 남은 시간(타격감)
+        public float FlashT;
     }
 }
