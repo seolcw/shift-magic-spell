@@ -31,6 +31,18 @@ namespace ShiftMagicSpell.Tests
             return new GameSession(LoadAttackPatterns(), LoadBoardLayouts(), seed);
         }
 
+        /// <summary>
+        /// 타격 멈춤(히트스톱)을 끈다. 전환·재시작처럼 정해진 시간을 재는 테스트용(멈춤 동안은 로직 시간이 흐르지 않아서).
+        /// 수치는 복사본이라 에셋은 바뀌지 않는다.
+        /// </summary>
+        public static void DisableHitStop(GameSession game)
+        {
+            foreach (HitKind kind in System.Enum.GetValues(typeof(HitKind)))
+            {
+                game.Data.HitFeel.Get(kind).HitStop = 0f;
+            }
+        }
+
         /// <summary>판 b의 1행 앞쪽에 단어 글자를 키 바꿔치기로 놓고 단어 판정을 돌린다(웹 verify-rules의 place)</summary>
         public static void PlaceWord(GameSession game, int boardIndex, string word)
         {

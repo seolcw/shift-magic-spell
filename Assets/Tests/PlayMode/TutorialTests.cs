@@ -70,6 +70,8 @@ namespace ShiftMagicSpell.Tests
         [Test]
         public void StartAndDeathRestart_GiveThreeSecondsBeforeFirstAttack()
         {
+            // 쓰러짐 화면 시간을 정확히 재므로 사망 타격 멈춤은 끈다(타격감은 HitFeedbackTests에서)
+            TestDataUtils.DisableHitStop(_game);
             _game.StartPhase(0);
             Assert.AreEqual(_game.Config.StartFirstAttackDelay, _game.Hand.T, 0.001f);
             _game.IsInvincible = true;
