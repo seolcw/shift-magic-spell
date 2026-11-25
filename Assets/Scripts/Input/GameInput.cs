@@ -6,7 +6,7 @@ namespace ShiftMagicSpell.Input
 {
     /// <summary>
     /// 키보드를 물리 위치로 읽어(Input System의 Key는 자판 배열과 무관) GameSession에 넘긴다.
-    /// WASD/방향키 이동, Shift+방향키 줄 돌리기, Space 발동, R 재시작, P 일시정지.
+    /// WASD/방향키 이동, Shift+방향키 줄 돌리기, Space 발동, R 재시작, P 일시정지. 엔딩 중 Space·Enter·클릭은 건너뛰기.
     /// 첫 화면은 클릭(또는 키)으로 시작한다: WebGL에서 캔버스에 키 포커스를 주고 오디오를 풀기 위해서다.
     /// 에디터·개발 빌드에서만 F1 무적, F2 페이즈 건너뛰기.
     /// </summary>
@@ -50,6 +50,18 @@ namespace ShiftMagicSpell.Input
             if (keyboard.rKey.wasPressedThisFrame && isRestartAllowed)
             {
                 game.RestartPhase();
+                return;
+            }
+
+            // 엔딩 연출 중: Space·Enter·클릭으로 건너뛰고 바로 결과 화면
+            if (game.State == GameState.Win && !game.IsEndingDone)
+            {
+                bool isClicked = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame;
+                if (keyboard.spaceKey.wasPressedThisFrame || keyboard.enterKey.wasPressedThisFrame || isClicked)
+                {
+                    game.SkipEnding();
+                }
+
                 return;
             }
 

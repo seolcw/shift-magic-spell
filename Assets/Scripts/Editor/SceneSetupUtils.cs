@@ -67,6 +67,7 @@ namespace ShiftMagicSpell.Editor
             HudView hud = HudSetupUtils.BuildHud();
             HitEdgeView hitEdge = HitFeedbackSetupUtils.BuildHitEdge(hud.gameObject);
             ScreensView screens = HudSetupUtils.BuildScreens();
+            HudSetupUtils.BuildEnding(screens);
 
             var game = new GameObject("Game");
             GameRenderer renderer = game.AddComponent<GameRenderer>();

@@ -82,6 +82,15 @@ namespace ShiftMagicSpell.Editor
         }
 
         /// <summary>쓰러짐 화면의 원인 줄과 블록 유지 안내</summary>
+        /// <summary>엔딩 자막: Screens 아래 Ending(평소 꺼짐) + 가운데 글자(그림자). 문구는 AttackPatterns.Ending.Caption을 코드가 한 글자씩 채운다.</summary>
+        public static void BuildEnding(ScreensView screens)
+        {
+            GameObject ending = Child(screens.gameObject, "Ending", 0f, 0f);
+            PixelText caption = AddText(ending, "Caption", string.Empty, CENTER_X, 46f, ViewAssets.Instance.Colors.Text, TextAlign.Center, 1, true, order: RenderOrderUtils.SCREEN_PANEL + 2);
+            ending.SetActive(false);
+            PrefabSetupUtils.SetRefs(screens, ("_ending", ending), ("_endingCaption", caption));
+        }
+
         public static void BuildDeadCause(ScreensView screens, GameObject dead)
         {
             foreach (string oldName in new[] { "Cause", "Kept" })

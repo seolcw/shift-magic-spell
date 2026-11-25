@@ -42,6 +42,13 @@ namespace ShiftMagicSpell.Editor
             (SoundKey.PhaseClear, "Fanfare", 0.7f, 1f, 0f, 0f),
             (SoundKey.Win, "Fanfare", 0.8f, 0.85f, 0f, 0f),
             (SoundKey.Death, "Death", 0.7f, 1f, 0f, 0f),
+            (SoundKey.EndingCrack, "Crack", 0.6f, 1f, 0.05f, 0f),
+            (SoundKey.EndingCrackBig, "Crack", 0.75f, 0.8f, 0f, 0f),
+            (SoundKey.EndingPop1, "Pop", 0.55f, 1f, 0f, 0f),
+            (SoundKey.EndingPop2, "Pop", 0.55f, 1.15f, 0f, 0f),
+            (SoundKey.EndingPop3, "Pop", 0.55f, 1.3f, 0f, 0f),
+            (SoundKey.EndingZip, "Zip", 0.6f, 1f, 0f, 0f),
+            (SoundKey.EndingType, "Move", 0.12f, 1.6f, 0.08f, 0.03f),
         };
 
         [MenuItem("Tools/Shift Magic Spell/Setup Audio (Library, Prefab)")]

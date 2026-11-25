@@ -41,6 +41,17 @@ namespace ShiftMagicSpell.View
         [Tooltip("배너 시간 중 이 비율 안에 다시 내려온다")]
         [SerializeField, Range(0.1f, 1f)] private float _returnRatio = 0.6f;
 
+        [Header("엔딩(고장 난 커서) — 단계 시각은 AttackPatterns.Ending")]
+        [Tooltip("금이 간 손이 떠는 폭(px). 두 번째 금은 2배")]
+        [SerializeField] private float _crackTremblePx = 1f;
+        [Tooltip("텍스트 커서 I가 깜빡이는 빠르기(초당)")]
+        [SerializeField] private float _beamBlinkRate = 3f;
+        [Tooltip("작은 화살표가 좌우를 두리번거리는 간격(초)")]
+        [SerializeField] private float _arrowLookTime = 0.45f;
+        [Tooltip("화살표가 달아나는 방향(화면 px, y 아래가 +)과 거리")]
+        [SerializeField] private Vector2 _zipDir = new Vector2(1f, -0.6f);
+        [SerializeField] private float _zipDistancePx = 320f;
+
         private Vector3 _bodyHome;
         private bool _hasBodyHome;
 
@@ -59,6 +70,16 @@ namespace ShiftMagicSpell.View
                 _hasBodyHome = true;
             }
 
+            // 엔딩: SHIFT를 맞고 금이 간 뒤부터는 고장 난 커서가 모양을 바꾸다 달아난다
+            EndingStage stage = game.EndingStage;
+            if (stage >= EndingStage.Crack1)
+            {
+                RenderEnding(game, stage);
+                return;
+            }
+
+            _body.enabled = true;
+            _body.flipX = false;
             ViewColors colors = ViewAssets.Instance.Colors;
             HandController hand = game.Hand;
             AttackPlan attack = hand.Attack;
@@ -98,6 +119,73 @@ namespace ShiftMagicSpell.View
             _shadow.color = new Color(0f, 0f, 0f, _shadowAlpha);
             _shadow.sortingOrder = _sortingOrder - 1;
         }
+
+        /// <summary>
+        /// 엔딩: 금 간 손(떨림) → 모래시계(빙글) → 텍스트 커서 I(깜빡임) → 작은 화살표(두리번) → 화면 밖으로 휙 → 사라짐.
+        /// 펑 연기·잔상은 GameRenderer(Ending)가 그린다.
+        /// </summary>
+        private void RenderEnding(GameSession game, EndingStage stage)
+        {
+            ArtCatalog catalog = ViewAssets.Instance.Catalog;
+            EndingValues ending = game.Data.Ending;
+            float t = game.StateT;
+            float local = t - ending.GetStageStart(stage);
+            transform.localPosition = ViewUtils.PixelToWorld(ViewUtils.ToPixel(game.Hand.Pos));
+            _shadow.enabled = false;
+            _body.sortingOrder = _sortingOrder;
+            _body.color = Color.white;
+            _body.flipX = false;
+            _body.enabled = stage < EndingStage.Caption;
+            SpriteFlashUtils.Apply(_body, 0f);
+            Vector2 offset = Vector2.zero;
+            switch (stage)
+            {
+                case EndingStage.Crack1:
+                case EndingStage.Crack2:
+                    {
+                        int crack = stage == EndingStage.Crack1 ? 0 : 1;
+                        _body.sprite = catalog.GetFrame("CursorShift", "Crack", crack).Sprite;
+                        offset.x = Mathf.Round(Mathf.Sin(t * 60f) * _crackTremblePx * (crack + 1));
+                        break;
+                    }
+
+                case EndingStage.Hourglass:
+                    _body.sprite = catalog.GetAnimated("CursorShift", "Hourglass", local).Sprite;
+                    offset.y = Mathf.Round(Mathf.Sin(local * 6f) * 1f);
+                    break;
+                case EndingStage.Beam:
+                    _body.sprite = catalog.GetFrame("CursorShift", "Beam", 0).Sprite;
+                    _body.enabled = Mathf.FloorToInt(local * _beamBlinkRate * 2f) % 3 != 2;
+                    break;
+                case EndingStage.Arrow:
+                    _body.sprite = catalog.GetFrame("CursorShift", "Arrow", 0).Sprite;
+                    _body.flipX = Mathf.FloorToInt(local / Mathf.Max(0.05f, _arrowLookTime)) % 2 == 1;
+                    offset.y = Mathf.Round(Mathf.Abs(Mathf.Sin(local * 8f)) * -2f);
+                    break;
+                case EndingStage.Zip:
+                    {
+                        _body.sprite = catalog.GetFrame("CursorShift", "Arrow", 0).Sprite;
+                        float u = Mathf.Clamp01(local / Mathf.Max(0.01f, ending.ZipTime));
+                        offset = GetZipDir() * (_zipDistancePx * u * u);
+                        _body.enabled = u < 1f;
+                        break;
+                    }
+
+                default:
+                    break;
+            }
+
+            _body.transform.localScale = Vector3.one;
+            _body.transform.localPosition = _bodyHome + new Vector3(Mathf.Round(offset.x), -Mathf.Round(offset.y), 0f) / ViewUtils.PPU;
+        }
+
+        /// <summary>화살표가 달아나는 방향(길이 1, 화면 px)</summary>
+        public Vector2 GetZipDir()
+        {
+            return _zipDir.sqrMagnitude > 0.0001f ? _zipDir.normalized : Vector2.up;
+        }
+
+        public float ZipDistancePx => _zipDistancePx;
 
         // 페이즈 전환: 마법을 맞고 크게 흔들리다 화면 위로 물러났다가(PhaseClear), 배너 동안 다시 내려온다(PhaseIntro). 화면 픽셀(y 아래가 +)
         private Vector2 GetTransitionOffset(GameSession game)

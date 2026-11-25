@@ -48,6 +48,9 @@ namespace ShiftMagicSpell.Core
         public float LastFireTime;
         public int LastFireCombo;
 
+        // 엔딩: 지난 프레임의 단계(단계가 바뀌는 순간 금 가는 흔들림을 건다)
+        private EndingStage _endingStage = EndingStage.None;
+
         // 날아가는 중인 마법들. 손에 닿는 순간 타격감을 건다. 콤보는 앞 마법이 닿기 전에 다음 마법을 쏠 수 있어서 목록으로 둔다.
         private readonly List<PendingSpellHit> _pendingSpellHits = new List<PendingSpellHit>();
 
@@ -74,6 +77,24 @@ namespace ShiftMagicSpell.Core
         public ConfigValues Config => Data.Config;
         public PhaseDef CurrentPhase => Data.Phases[Phase];
         public bool IsLastPhase => Phase == Data.Phases.Count - 1;
+
+        /// <summary>엔딩 단계(승리 상태가 아니면 None). 마무리 SHIFT를 쏜 순간부터 StateT로 센다.</summary>
+        public EndingStage EndingStage => State == GameState.Win ? Data.Ending.GetStage(StateT) : EndingStage.None;
+
+        /// <summary>엔딩이 끝나 결과 화면을 띄울 때인가</summary>
+        public bool IsEndingDone => State == GameState.Win && StateT >= Data.Ending.EndAt;
+
+        /// <summary>지금까지 찍힌 엔딩 자막 글자 수. 자막 단계에서만 보인다(건너뛰면 자막 없이 바로 결과 화면).</summary>
+        public int EndingCaptionLength => EndingStage == EndingStage.Caption ? Data.Ending.GetCaptionLength(StateT) : 0;
+
+        /// <summary>엔딩 건너뛰기(Space·Enter·클릭): 바로 결과 화면</summary>
+        public void SkipEnding()
+        {
+            if (State == GameState.Win && !IsEndingDone)
+            {
+                StateT = Data.Ending.EndAt;
+            }
+        }
 
         /// <summary>연습 구간: 손이 공격하지 않고, 단어 힌트가 계속 켜져 있고, 안내가 차례로 나온다</summary>
         public bool IsTutorial => Phase == 0 && !IsTutorialDone;
@@ -396,6 +417,7 @@ namespace ShiftMagicSpell.Core
             {
                 case GameState.Win:
                     StateT += dt;
+                    UpdateEnding();
                     break;
                 case GameState.Dead:
                     // 사망: 현재 페이즈 처음부터(판도 시작 배치로), 손 HP는 잃은 만큼의 절반만 회복. 슬롯에 모아 둔 블록은 남긴다.
@@ -448,6 +470,24 @@ namespace ShiftMagicSpell.Core
         {
             FinisherIntroT = Config.FinisherIntroTime;
             Hand.CancelAttack(Config.FinisherIntroTime + Config.PhaseFirstAttackDelay);
+        }
+
+        // 엔딩 단계가 바뀌는 순간: 손에 금이 갈 때 화면이 툭 흔들린다(그림·소리는 View·Audio가 단계를 보고 정한다)
+        private void UpdateEnding()
+        {
+            EndingStage stage = EndingStage;
+            if (stage == _endingStage)
+            {
+                return;
+            }
+
+            _endingStage = stage;
+            if (stage == EndingStage.Crack1 || stage == EndingStage.Crack2)
+            {
+                HitFeelLevel slam = Data.HitFeel.Slam;
+                float scale = stage == EndingStage.Crack2 ? 1.5f : 1f;
+                Feel.Shake.StartIfStronger(slam.ShakeTime, slam.ShakePx * scale * Data.HitFeel.ShakeScale, Vector2.down);
+            }
         }
 
         /// <summary>

@@ -105,6 +105,8 @@ namespace ShiftMagicSpell.View
             _player.Render(game);
             _hand.Render(game);
             DrawCellFx();
+            UseCanvas(_fxCanvas);
+            DrawEndingFx();
             UseCanvas(_overCanvas);
             DrawSlotArrows();
             _hud.Render(game);
