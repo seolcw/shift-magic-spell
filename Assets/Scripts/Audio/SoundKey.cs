@@ -26,5 +26,14 @@ namespace ShiftMagicSpell.Audio
         PhaseClear,
         Win,
         Death,
+
+        // 엔딩(고장 난 커서): 금 → 펑(모양이 바뀔 때마다 높아짐) → 달아남 → 자막 글자
+        EndingCrack,
+        EndingCrackBig,
+        EndingPop1,
+        EndingPop2,
+        EndingPop3,
+        EndingZip,
+        EndingType,
     }
 }

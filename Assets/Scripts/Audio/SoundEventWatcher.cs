@@ -35,6 +35,8 @@ namespace ShiftMagicSpell.Audio
         private int _wordsDone;
         private int _combos;
         private int _hits;
+        private EndingStage _endingStage;
+        private int _endingCaptionLength;
         private SoundKey? _pendingJingle;
         private float _jingleAt;
 
@@ -58,6 +60,8 @@ namespace ShiftMagicSpell.Audio
 
             _state = session.State;
             _feelSerial = session.Feel.Serial;
+            _endingStage = session.EndingStage;
+            _endingCaptionLength = session.EndingCaptionLength;
             _banner = session.Banner;
             _finisherIntroT = session.FinisherIntroT;
             SnapshotStats();
@@ -97,6 +101,7 @@ namespace ShiftMagicSpell.Audio
             bool hasWarp = PollFx();
             bool isHurt = PollStats();
             PollHand();
+            PollEnding();
             // 순간이동·페이즈 시작·피격(줄 섞기에 같이 밀림)으로 칸이 바뀐 것은 걸음이 아니다
             PollPlayer(isStateChanged || isPhaseStarted || hasWarp || isHurt);
             PollJingleFallback();
@@ -263,6 +268,52 @@ namespace ShiftMagicSpell.Audio
             }
 
             return hasWarp;
+        }
+
+        // 엔딩 단계가 바뀌는 순간과 자막 글자가 하나 찍힐 때마다
+        private void PollEnding()
+        {
+            EndingStage stage = _session.EndingStage;
+            if (stage != _endingStage)
+            {
+                SoundKey? key = GetEndingKey(stage);
+                if (key.HasValue)
+                {
+                    _keys.Add(key.Value);
+                }
+
+                _endingStage = stage;
+            }
+
+            int length = _session.EndingCaptionLength;
+            if (length > _endingCaptionLength && stage == EndingStage.Caption)
+            {
+                _keys.Add(SoundKey.EndingType);
+            }
+
+            _endingCaptionLength = length;
+        }
+
+        /// <summary>엔딩 단계가 시작될 때 나는 소리(없으면 null)</summary>
+        public static SoundKey? GetEndingKey(EndingStage stage)
+        {
+            switch (stage)
+            {
+                case EndingStage.Crack1:
+                    return SoundKey.EndingCrack;
+                case EndingStage.Crack2:
+                    return SoundKey.EndingCrackBig;
+                case EndingStage.Hourglass:
+                    return SoundKey.EndingPop1;
+                case EndingStage.Beam:
+                    return SoundKey.EndingPop2;
+                case EndingStage.Arrow:
+                    return SoundKey.EndingPop3;
+                case EndingStage.Zip:
+                    return SoundKey.EndingZip;
+                default:
+                    return null;
+            }
         }
 
         /// <summary>attackPatterns.json의 spells.fx 값 → 소리 묶음</summary>

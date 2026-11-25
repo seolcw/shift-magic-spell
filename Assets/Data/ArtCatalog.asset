@@ -72,6 +72,35 @@ MonoBehaviour:
     - Name: Debris
       From: 0
       To: 1
+  - Name: CursorShift
+    CanvasSize: {x: 32, y: 32}
+    Frames:
+    - {fileID: 2535263009172216881, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    - {fileID: 9108314009174530158, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    - {fileID: -8321822224660482011, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    - {fileID: 8685066950366980792, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    - {fileID: 8106258747308847838, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    - {fileID: -523907556996621990, guid: 580653413119638419899f9aa2f3e5e2, type: 3}
+    Durations:
+    - 0.2
+    - 0.2
+    - 0.25
+    - 0.25
+    - 0.1
+    - 0.1
+    Tags:
+    - Name: Crack
+      From: 0
+      To: 1
+    - Name: Hourglass
+      From: 2
+      To: 3
+    - Name: Beam
+      From: 4
+      To: 4
+    - Name: Arrow
+      From: 5
+      To: 5
   - Name: EdgeArrow
     CanvasSize: {x: 12, y: 12}
     Frames:
@@ -473,6 +502,20 @@ MonoBehaviour:
       To: 1
     - Name: Hurt
       From: 2
+      To: 2
+  - Name: Poof
+    CanvasSize: {x: 16, y: 16}
+    Frames:
+    - {fileID: -5239678554255837568, guid: a284fb19cf5065c41b5be9e2437b2308, type: 3}
+    - {fileID: 6619389948280959667, guid: a284fb19cf5065c41b5be9e2437b2308, type: 3}
+    - {fileID: 7290720487599920076, guid: a284fb19cf5065c41b5be9e2437b2308, type: 3}
+    Durations:
+    - 0.06
+    - 0.08
+    - 0.1
+    Tags:
+    - Name: Poof
+      From: 0
       To: 2
   - Name: Rocket
     CanvasSize: {x: 16, y: 10}

@@ -18,6 +18,7 @@ Made for **GitHub Game Off 2026** (theme: **SHIFT**).
 | P | Pause |
 | R | Restart the current phase |
 | M | Mute / unmute |
+| Space / Enter / Click | Skip the ending scene |
 
 1. **Line up the word.** The target word (top of the screen) must be spelled in one row (left → right) or one column (top → bottom). Letters never change; only their positions shift. Letter positions flash every few seconds, so keep moving and watch.
 2. **Store it.** A finished word becomes a spell block in an attack slot on the **other** keyboard.
@@ -26,6 +27,14 @@ Made for **GitHub Game Off 2026** (theme: **SHIFT**).
 5. After three phases, the final word is **SHIFT**.
 
 The first word (`FIRE`) is a practice round: the cursor does not attack until you cast your first block.
+
+## Features
+
+- **Shift is the verb.** Every move that matters rotates a row or column of keys (Loopover-style). The cursor shoves rows too, so the board is always shifting under you.
+- **Two keyboards, one loop.** Words finished on one keyboard are cast from the other, so you keep teleporting through the blue Shift keys.
+- **17 spell words, 10 spell effects.** Fireballs, lightning, lasers, gusts, stars, ice shards, blades, a rocket and a dragon's breath.
+- **Game feel on every hit.** A short hit-stop (inputs pressed during it are kept, not dropped), a white flash on whoever got hit, screen shake in the direction of the hit, knockback and squash, flying debris, a red screen edge when you are hurt (it pulses at 1 HP), and heavier sounds for bigger hits. All strengths live in `AttackPatterns.asset > Hit Feel`, including global shake and flash multipliers.
+- **An ending.** After the final SHIFT, the giant cursor cracks, flips through an hourglass and a text I-beam, shrinks into a tiny arrow, and runs off screen. It was just a stuck cursor.
 
 ## Building
 
@@ -41,7 +50,9 @@ The first word (`FIRE`) is a practice round: the cursor does not attack until yo
    - The custom template `Assets/WebGLTemplates/ShiftMagicSpell` shows only the 960x600 canvas (no footer, no scroll bars).
 4. itch.io: zip the build folder so `index.html` is at the top of the zip, upload it as an HTML game, set the embed size to **960 x 600**, and turn on itch.io's **Fullscreen button** (the game itself has no fullscreen button; the canvas scales to fit when the frame gets larger).
 
-Tests: PlayMode tests in `Assets/Tests/PlayMode` (rules, bot playthroughs, input, sound, screen captures). Run them with the Unity Test Runner or in batch mode (`-runTests -testPlatform PlayMode`) with the editor closed.
+Tests: PlayMode tests in `Assets/Tests/PlayMode` (rules, bot playthroughs, input, sound, hit feedback, ending, screen captures; 74 tests). Run them with the Unity Test Runner or in batch mode (`-runTests -testPlatform PlayMode`) with the editor closed. Screen captures are written to `Logs/Screens/`.
+
+Recording the ending as a video: run the explicit test `ShiftMagicSpell.Tests.EndingVideoRecordTests.RecordEndingFrames` (`-testFilter`). It saves 30 fps frames and a log of every sound actually played to `Logs/Video/ending/`; combine them with ffmpeg (frames scaled 3x with nearest-neighbor, each sound delayed to its frame with the logged volume and pitch).
 
 Pixel art lives in `Assets/Art/*.aseprite` and is imported directly (Aseprite Importer). The generator scripts are in `ArtSource/Scripts/` (run with Aseprite `-b --script`).
 
@@ -49,13 +60,13 @@ Pixel art lives in `Assets/Art/*.aseprite` and is imported directly (Aseprite Im
 
 - `HANDOVER.md`: current status and next steps
 - `Docs/DESIGN.md`: game design (rules, numbers, assets)
-- `Docs/UNITY-STRUCTURE.md`: what to edit where in the Unity project
+- `Docs/UNITY-STRUCTURE.md`: what to edit where in the Unity project (also the **Tools → Shift Magic Spell** menu)
 - `WebPrototype/`: the HTML prototype the Unity version was ported from
 
 ## Credits
 
 - Game design, code and pixel art: seolcw
-- Sound effects: made for this project with [jsfxr](https://sfxr.me/) (settings in `Assets/Audio/Sfx/README.md`)
+- Sound effects: made for this project with [jsfxr](https://sfxr.me/) (settings and sfxr.me links for every sound in `Assets/Audio/Sfx/README.md`)
 - Music: "Chiptune Grooving" from [Pixabay](https://pixabay.com/) (uploader 8059346, audio ID 142242), used under the Pixabay Content License
 - Pixel font (5x7): made for this project
 

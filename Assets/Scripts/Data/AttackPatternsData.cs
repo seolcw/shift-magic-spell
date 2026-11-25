@@ -21,6 +21,9 @@ namespace ShiftMagicSpell.Data
         [Tooltip("타격감: 멈춤·흔들림·번쩍임·넉백·조각·소리 세기 (Unity에서 추가, 웹 JSON에 없음)")]
         public HitFeelValues HitFeel = new HitFeelValues();
 
+        [Tooltip("엔딩 연출(거대한 손은 고장 난 커서였다) 단계 시각과 자막 (Unity에서 추가, 웹 JSON에 없음)")]
+        public EndingValues Ending = new EndingValues();
+
         private Dictionary<string, SpellDef> _spellDict;
         private Dictionary<string, AttackDef> _attackDict;
 
