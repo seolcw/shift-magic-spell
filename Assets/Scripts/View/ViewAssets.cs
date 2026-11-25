@@ -23,6 +23,8 @@ namespace ShiftMagicSpell.View
         public Sprite Shadow;
         [Tooltip("플레이어 테두리(18x18). 피벗 왼쪽 아래")]
         public Sprite Outline;
+        [Tooltip("타격감 하얀 번쩍임 머티리얼(ShiftMagicSpell/SpriteFlash 셰이더). 플레이어·손·공격 블록에 쓴다")]
+        public Material FlashMaterial;
 
         [Header("화면 배치 (320x200 픽셀, 왼쪽 위 원점)")]
         public ScreenLayoutValues Layout = new ScreenLayoutValues();

@@ -292,6 +292,7 @@ namespace ShiftMagicSpell.Core
                 {
                     cell.Block.Age += dt;
                     cell.Block.HitT = Mathf.Max(0f, cell.Block.HitT - dt);
+                    cell.Block.FlashT = Mathf.Max(0f, cell.Block.FlashT - dt);
                 }
             }
         }

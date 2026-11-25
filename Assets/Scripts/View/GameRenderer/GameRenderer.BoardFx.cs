@@ -65,6 +65,9 @@ namespace ShiftMagicSpell.View
                     case FxKind.Spell:
                         DrawSpell(fx);
                         break;
+                    case FxKind.Debris:
+                        DrawDebris(fx);
+                        break;
                     case FxKind.Match:
                         {
                             // 맞춘 칸이 초록으로 번쩍이며 퍼진다
@@ -188,7 +191,58 @@ namespace ShiftMagicSpell.View
 
         private static bool IsFxLayer(FxKind kind)
         {
-            return kind == FxKind.Spell || kind == FxKind.Float || kind == FxKind.Click;
+            return kind == FxKind.Spell || kind == FxKind.Float || kind == FxKind.Click || kind == FxKind.Debris;
+        }
+
+        /// <summary>
+        /// 타격감 조각: 맞은 자리에서 밀린 방향 쪽으로 부채꼴로 튀었다가 떨어진다. 조각마다 각도·속도는 Seed로 정해져 매 프레임 같다.
+        /// player = 분홍 점, hand = 흰 점과 마법 색 별, block = 블록 조각(마법 색).
+        /// </summary>
+        private void DrawDebris(FxEvent fx)
+        {
+            float age = fx.Duration - fx.T;
+            float u = Mathf.Clamp01(age / fx.Duration);
+            Color fade = Color.white.WithAlpha(1f - u * u);
+            Vector2 origin = ToPixel(fx.From);
+            Vector2 dir = fx.To.sqrMagnitude > 0.0001f ? fx.To.normalized : Vector2.up;
+            float baseAngle = Mathf.Atan2(dir.y, dir.x);
+            for (int i = 0; i < fx.Count; i++)
+            {
+                float angle = baseAngle + (Hash(fx.Seed, i, 1) - 0.5f) * _debrisSpread;
+                float speed = Mathf.Lerp(_debrisSpeed.x, _debrisSpeed.y, Hash(fx.Seed, i, 2));
+                var velocity = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * speed;
+                Vector2 position = origin + velocity * age + new Vector2(0f, 0.5f * _debrisGravity * age * age);
+                float x = Mathf.Round(position.x);
+                float y = Mathf.Round(position.y);
+                switch (fx.Style)
+                {
+                    case "hand":
+                        if (i % 2 == 0)
+                        {
+                            _canvas.DrawRect(x - 1f, y - 1f, 2f, 2f, Color.white * fade);
+                        }
+                        else
+                        {
+                            _canvas.DrawFrameCentered(Animated("Star", "Twinkle", age), x, y, fx.Color * fade);
+                        }
+
+                        break;
+                    case "block":
+                        _canvas.DrawFrameCentered(Animated("BlockDebris", "Debris", age), x, y, fx.Color * fade);
+                        break;
+                    default:
+                        float size = i % 3 == 0 ? 2f : 1f;
+                        _canvas.DrawRect(x, y, size, size, fx.Color * fade);
+                        break;
+                }
+            }
+        }
+
+        // 0~1 결정적 난수(같은 조각은 매 프레임 같은 값)
+        private static float Hash(float seed, int index, int salt)
+        {
+            float value = Mathf.Sin(seed * 12.9898f + index * 78.233f + salt * 37.719f) * 43758.5453f;
+            return value - Mathf.Floor(value);
         }
     }
 }

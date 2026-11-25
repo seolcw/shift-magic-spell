@@ -83,6 +83,12 @@ namespace ShiftMagicSpell.Audio
         /// <summary>효과음 하나를 낸다. 같은 이벤트를 MinInterval 안에 다시 부르면 무시한다.</summary>
         public void Play(SoundKey key)
         {
+            Play(key, 1f, 1f);
+        }
+
+        /// <summary>세기를 바꿔 낸다(타격감: 큰 타격은 낮고 크게, 약한 타격은 작게). 크기는 1을 넘지 않는다.</summary>
+        public void Play(SoundKey key, float volumeMul, float pitchMul)
+        {
             OnSoundRequested?.Invoke(key);
             if (_library == null || !_library.TryGetEntry(key, out SoundEntry entry))
             {
@@ -99,8 +105,8 @@ namespace ShiftMagicSpell.Audio
             AudioSource source = _sfxSources[_nextVoice];
             _nextVoice = (_nextVoice + 1) % _sfxSources.Length;
             source.clip = entry.Clip;
-            source.volume = entry.Volume * _library.SfxVolume;
-            source.pitch = entry.Pitch * (1f + UnityEngine.Random.Range(-entry.PitchJitter, entry.PitchJitter));
+            source.volume = Mathf.Clamp01(entry.Volume * _library.SfxVolume * volumeMul);
+            source.pitch = entry.Pitch * pitchMul * (1f + UnityEngine.Random.Range(-entry.PitchJitter, entry.PitchJitter));
             source.Play();
         }
 
@@ -126,7 +132,8 @@ namespace ShiftMagicSpell.Audio
 
             foreach (SoundKey key in _watcher.Poll())
             {
-                Play(key);
+                _watcher.TryGetWeight(key, out float volume, out float pitch);
+                Play(key, volume, pitch);
             }
 
             if (_watcher.Session.State != GameState.Ready)

@@ -15,6 +15,9 @@ namespace ShiftMagicSpell.Tests
         public void SetUp()
         {
             _game = TestDataUtils.CreateSession(7);
+
+            // 전환 시간을 정확히 재므로 마법이 손에 맞는 순간의 타격 멈춤은 끈다(타격감은 HitFeedbackTests에서)
+            TestDataUtils.DisableHitStop(_game);
         }
 
         private void Step(float seconds)

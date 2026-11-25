@@ -43,9 +43,23 @@ namespace ShiftMagicSpell.View
         [Tooltip("웹 프로토타입 px 값(궤적 높이·퍼짐)을 화면 px로 바꾸는 배율(칸 50px → 16px)")]
         [SerializeField] private float _spellDistanceScale = 16f / 50f;
 
-        [Header("화면 흔들림")]
-        [Tooltip("흔들림 세기 1일 때 최대 이동(px)")]
-        [SerializeField] private float _shakePx = 4f;
+        [Header("화면 흔들림 (세기·시간은 AttackPatterns.HitFeel)")]
+        [Tooltip("맞은 방향으로 밀렸다 돌아오는 진동 빠르기(초당 왕복)")]
+        [SerializeField] private float _shakeFrequency = 18f;
+        [Tooltip("맞은 방향과 수직으로 섞는 떨림 비율(0이면 한 방향으로만 흔들림)")]
+        [SerializeField, Range(0f, 1f)] private float _shakeNoise = 0.35f;
+
+        [Header("타격감 조각 (개수는 AttackPatterns.HitFeel)")]
+        [Tooltip("조각이 튀는 부채꼴 폭(라디안). 밀린 방향을 가운데로 퍼진다")]
+        [SerializeField] private float _debrisSpread = 2.4f;
+        [Tooltip("조각 처음 속도 범위(px/초)")]
+        [SerializeField] private Vector2 _debrisSpeed = new Vector2(40f, 95f);
+        [Tooltip("조각이 떨어지는 중력(px/초²)")]
+        [SerializeField] private float _debrisGravity = 220f;
+
+        [Header("타격감 화면 테두리")]
+        [Tooltip("플레이어가 맞으면 빨갛게 물드는 화면 테두리(흔들리지 않는 화면 쪽)")]
+        [SerializeField] private HitEdgeView _hitEdge;
 
         private PixelCanvas _canvas;
         private PixelTextDrawer _text;
@@ -94,6 +108,11 @@ namespace ShiftMagicSpell.View
             UseCanvas(_overCanvas);
             DrawSlotArrows();
             _hud.Render(game);
+            if (_hitEdge != null)
+            {
+                _hitEdge.Render(game);
+            }
+
             _screens.Render(game);
             foreach (PixelCanvas canvas in canvases)
             {
@@ -111,17 +130,23 @@ namespace ShiftMagicSpell.View
             _text.Canvas = canvas;
         }
 
-        // 화면 흔들림: 판과 연출만 흔들고 화면 글자는 고정
+        // 화면 흔들림: 판과 연출만 흔들고 화면 글자는 고정. 맞은 방향으로 한 번 크게 밀렸다가(cos 0 = 1)
+        // 왕복하며 줄어든다. 수직 방향 떨림을 조금 섞는다. 도트가 번지지 않게 정수 픽셀로만 움직인다.
         private void ApplyShake()
         {
             Vector2 offset = Vector2.zero;
-            if (_game.Shake > 0f)
+            HitPulse shake = _game.Feel.Shake;
+            if (shake.IsActive)
             {
                 _shakeSeed += 1f;
-                float amount = _shakePx * _game.Shake;
-                offset = new Vector2(
-                    Mathf.Round((Mathf.PerlinNoise(_shakeSeed * 0.7f, 0f) - 0.5f) * 2f * amount),
-                    Mathf.Round((Mathf.PerlinNoise(0f, _shakeSeed * 0.7f) - 0.5f) * 2f * amount));
+                float elapsed = shake.Duration - shake.T;
+                float strength = shake.Strength;
+                Vector2 dir = shake.Dir.sqrMagnitude > 0.0001f ? shake.Dir.normalized : Vector2.down;
+                var side = new Vector2(-dir.y, dir.x);
+                float along = Mathf.Cos(elapsed * _shakeFrequency * Mathf.PI * 2f) * strength;
+                float across = (Mathf.PerlinNoise(_shakeSeed * 0.7f, 0f) - 0.5f) * 2f * strength * _shakeNoise;
+                offset = dir * along + side * across;
+                offset = new Vector2(Mathf.Round(offset.x), Mathf.Round(offset.y));
             }
 
             _worldRoot.localPosition = new Vector3(offset.x, -offset.y, 0f) / ViewUtils.PPU;

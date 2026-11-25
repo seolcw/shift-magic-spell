@@ -17,6 +17,7 @@ namespace ShiftMagicSpell.Core
         public static readonly Color Hand = Hex(0xd9dce6);
         public static readonly Color Bullet = Hex(0xffa23a);
         public static readonly Color Hp = Hex(0xff5d73);
+        public static readonly Color Player = Hex(0xff7ab0);
         public static readonly Color FireCore = Hex(0xfff3c4);
 
         public static Color Hex(int rgb, float alpha = 1f)

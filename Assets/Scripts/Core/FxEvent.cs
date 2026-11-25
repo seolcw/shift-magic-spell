@@ -15,6 +15,7 @@ namespace ShiftMagicSpell.Core
         Fizzle,
         Impact,
         Spell,
+        Debris,     // 타격감 조각: From = 위치, To = 주로 튀는 방향, Style = player/hand/block
     }
 
     /// <summary>

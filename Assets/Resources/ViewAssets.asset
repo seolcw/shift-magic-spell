@@ -16,6 +16,7 @@ MonoBehaviour:
   WhitePixel: {fileID: 21300000, guid: 01c9c4c9a6bd4544dbd29f6c566a446a, type: 3}
   Shadow: {fileID: 21300000, guid: 4d2fc7441a305474da839a2833966237, type: 3}
   Outline: {fileID: 21300000, guid: 9709055f352867d4b9c228c82b72c5c7, type: 3}
+  FlashMaterial: {fileID: 2100000, guid: 4fabccc5846a7dc4b9cc2f05d0a886db, type: 2}
   Layout:
     BoardOriginPx: {x: 32, y: 72}
     CellSizePx: {x: 16, y: 20}

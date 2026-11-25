@@ -6,7 +6,7 @@ namespace ShiftMagicSpell.View
 {
     /// <summary>
     /// 공격 슬롯 칸(Slot 프리팹): 받침(AttackSlot) + 담긴 블록(AttackBlock, 마법 색으로 틴트) + 마법 아이콘.
-    /// 블록은 들어올 때 커지며 나타나고, 손에게 맞으면 흔들리고 금이 간다. 루트 위치 = 칸 그림(16x20) 왼쪽 아래.
+    /// 블록은 들어올 때 커지며 나타나고, 손에게 맞으면 하얗게 번쩍이고(타격감) 흔들리고 금이 간다. 루트 위치 = 칸 그림(16x20) 왼쪽 아래.
     /// </summary>
     public class SlotView : MonoBehaviour
     {
@@ -55,6 +55,11 @@ namespace ShiftMagicSpell.View
             _block.sortingOrder = _blockSortingOrder;
             _icon.sprite = catalog.GetFrame("SpellIcon", spell?.Icon, 0).Sprite;
             _icon.sortingOrder = _blockSortingOrder + 1;
+
+            // 손에게 맞은 순간 블록과 아이콘이 함께 하얗게
+            float flash = block.FlashT > 0f ? 1f : 0f;
+            SpriteFlashUtils.Apply(_block, flash);
+            SpriteFlashUtils.Apply(_icon, flash);
         }
     }
 }

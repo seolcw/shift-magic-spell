@@ -20,6 +20,9 @@ namespace ShiftMagicSpell.Core
         private MoveDir _queuedDir;
         private bool _isQueuedRotate;
 
+        // 타격 멈춤(히트스톱) 중에 누른 Space: 멈춤이 끝나면 발동한다
+        private bool _isFireQueued;
+
         public int Board;
         public int R;
         public int C;
@@ -54,6 +57,7 @@ namespace ShiftMagicSpell.Core
             _repeatT = 0f;
             _restT = 0f;
             _hasQueuedInput = false;
+            _isFireQueued = false;
             Slide = null;
         }
 
@@ -80,6 +84,7 @@ namespace ShiftMagicSpell.Core
             _heldDirs.Clear();
             IsShiftHeld = false;
             _hasQueuedInput = false;
+            _isFireQueued = false;
         }
 
         public void Update(float dt)
@@ -96,6 +101,12 @@ namespace ShiftMagicSpell.Core
                 {
                     Slide = null;
                 }
+            }
+
+            if (_isFireQueued)
+            {
+                _isFireQueued = false;
+                Fire();
             }
 
             _restT = Mathf.Max(0f, _restT - dt);
@@ -116,12 +127,18 @@ namespace ShiftMagicSpell.Core
             }
         }
 
-        /// <summary>Space: 슬롯 칸에 서 있으면 담긴 블록을 발동</summary>
+        /// <summary>Space: 슬롯 칸에 서 있으면 담긴 블록을 발동. 타격 멈춤 중이면 예약했다가 멈춤이 끝나면 발동한다.</summary>
         public bool Fire()
         {
             BoardCell here = Here;
             if (_game.State != GameState.Play || !here.IsSlot)
             {
+                return false;
+            }
+
+            if (_game.Feel.IsHitStopped)
+            {
+                _isFireQueued = true;
                 return false;
             }
 
@@ -175,8 +192,8 @@ namespace ShiftMagicSpell.Core
         // Shift를 누른 채 방향키 = 서 있는 줄 돌리기(←→ 행, ↑↓ 열). Shift 없이 = 한 칸 이동. 누르고 있으면 반복.
         private void Act(MoveDir dir)
         {
-            // 쉬는 중이면 버리지 않고 마지막 입력 하나만 예약한다(입력이 씹힌 느낌이 나지 않게)
-            if (_restT > 0f)
+            // 쉬는 중이거나 타격 멈춤(히트스톱) 중이면 버리지 않고 마지막 입력 하나만 예약한다(입력이 씹힌 느낌이 나지 않게)
+            if (_restT > 0f || _game.Feel.IsHitStopped)
             {
                 _hasQueuedInput = true;
                 _queuedDir = dir;

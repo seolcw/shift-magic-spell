@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ShiftMagicSpell.Core;
+using ShiftMagicSpell.Data;
 
 namespace ShiftMagicSpell.Audio
 {
@@ -14,6 +15,9 @@ namespace ShiftMagicSpell.Audio
         private const float JINGLE_FALLBACK_TIME = 1.5f;
 
         private readonly List<SoundKey> _keys = new List<SoundKey>();
+        // 이번 프레임 타격 소리의 세기(타격감 HitFeel의 SoundVolume·SoundPitch). 큰 타격은 낮고 크게, 약한 타격은 작게.
+        private readonly Dictionary<SoundKey, HitFeelLevel> _weights = new Dictionary<SoundKey, HitFeelLevel>();
+        private int _feelSerial;
         private HashSet<FxEvent> _prevFx = new HashSet<FxEvent>();
         private HashSet<FxEvent> _curFx = new HashSet<FxEvent>();
 
@@ -53,6 +57,7 @@ namespace ShiftMagicSpell.Audio
             }
 
             _state = session.State;
+            _feelSerial = session.Feel.Serial;
             _banner = session.Banner;
             _finisherIntroT = session.FinisherIntroT;
             SnapshotStats();
@@ -64,10 +69,13 @@ namespace ShiftMagicSpell.Audio
         public IReadOnlyList<SoundKey> Poll()
         {
             _keys.Clear();
+            _weights.Clear();
             if (_session == null)
             {
                 return _keys;
             }
+
+            PollHitWeight();
 
             // 새 판(StartNewRun)은 Stats를 새로 만든다: 카운터 기준만 다시 잡는다
             if (_session.Stats != _stats)
@@ -93,6 +101,62 @@ namespace ShiftMagicSpell.Audio
             PollPlayer(isStateChanged || isPhaseStarted || hasWarp || isHurt);
             PollJingleFallback();
             return _keys;
+        }
+
+        /// <summary>이번 프레임에 난 타격 소리의 세기. 없으면 false(보통 세기로 낸다).</summary>
+        public bool TryGetWeight(SoundKey key, out float volume, out float pitch)
+        {
+            if (_weights.TryGetValue(key, out HitFeelLevel level))
+            {
+                volume = level.SoundVolume;
+                pitch = level.SoundPitch;
+                return true;
+            }
+
+            volume = 1f;
+            pitch = 1f;
+            return false;
+        }
+
+        // 새 타격(HitFeedback.Serial이 바뀜)이 났으면 그 종류의 타격 소리들에 세기를 단다
+        private void PollHitWeight()
+        {
+            HitFeedback feel = _session.Feel;
+            if (feel.Serial == _feelSerial)
+            {
+                return;
+            }
+
+            _feelSerial = feel.Serial;
+            HitFeelLevel level = _session.Data.HitFeel.Get(feel.LastKind);
+            foreach (SoundKey key in GetHitKeys(feel.LastKind))
+            {
+                _weights[key] = level;
+            }
+        }
+
+        /// <summary>타격 종류 → 그 순간 나는 소리들</summary>
+        public static SoundKey[] GetHitKeys(HitKind kind)
+        {
+            switch (kind)
+            {
+                case HitKind.PlayerHurt:
+                    return new[] { SoundKey.PlayerHurt };
+                case HitKind.PlayerDeath:
+                    return new[] { SoundKey.PlayerHurt, SoundKey.Death };
+                case HitKind.Spell:
+                case HitKind.Combo:
+                case HitKind.Overflow:
+                case HitKind.Finisher:
+                    return new[] { SoundKey.SpellImpact };
+                case HitKind.BlockChip:
+                case HitKind.BlockBreak:
+                    return new[] { SoundKey.BlockBreak, SoundKey.HandClick };
+                case HitKind.Slam:
+                    return new[] { SoundKey.HandSlam };
+                default:
+                    return new SoundKey[0];
+            }
         }
 
         private bool PollState()
