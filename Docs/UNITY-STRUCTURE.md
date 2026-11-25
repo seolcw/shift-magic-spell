@@ -19,6 +19,10 @@
 | 타격감 세기(멈춤·흔들림·번쩍임·납작해짐·넉백·조각 수·소리 크기와 높이), 상황별(플레이어 피격·사망, 마법·콤보·80%·마무리, 블록 금·깨짐, 내려치기), 흔들림·번쩍임 전체 배율 | `Assets/Data/AttackPatterns.asset` > `Hit Feel` |
 | 흔들림 진동 빠르기·옆 떨림, 조각 퍼짐·속도·중력, 마법이 날아가는 비율·궤적 배율, 연출 프리팹 연결 | `Main` 씬 > `Game` > `GameRenderer` |
 | 빨간 화면 테두리(두께·투명도, HP 1일 때 뛰는 빠르기) | `Main` 씬 > `Hud` > `HitEdge` |
+| 엔딩 단계 시각·자막 문구 | `Assets/Data/AttackPatterns.asset` > `Ending` |
+| 엔딩 커서 떨림·깜빡임·두리번·달아나는 방향 | `Assets/Prefabs/Actors/Hand.prefab` (HandView, 엔딩 항목) |
+| 엔딩 펑 연기 시간·달아나는 잔상 | `Main` 씬 > `Game` > `GameRenderer` (엔딩 연출) |
+| 엔딩 자막 위치·색 | `Main` 씬 > `Screens` > `Ending` |
 | 하얀 번쩍임 머티리얼 | `Assets/Art/Generated/SpriteFlash.mat`(셰이더 `Assets/Shaders/SpriteFlash.shader`), `ViewAssets`의 `Flash Material` |
 | 카메라(320x200, PPU 16, 픽셀 퍼펙트) | `Main` 씬 > `Main Camera` |
 
@@ -45,6 +49,7 @@
 | Create View Assets (keeps edits) | 흰 점·그림자·테두리 PNG와 ViewAssets가 없으면 만듦 | 아니오 |
 | Import Prototype Data (overwrites asset values) | 웹 JSON으로 수치·배치 에셋을 덮어씀(확인 창) | **예** |
 | Recreate Main Scene (overwrites scene edits) | 씬을 처음 상태로 다시 만듦(확인 창). 수치 에셋·프리팹은 있으면 그대로 | **씬만** |
+| Add Ending To Main Scene (keeps edits) | Screens 아래에 엔딩 자막(Ending)이 없으면 만든다. 배치 모드 `EndingSetupUtils.SetupAll`은 임포트 설정·스프라이트 목록·소리 목록도 함께 갱신 | 씬은 없을 때만 추가 |
 | Add Hit Feedback To Main Scene (keeps edits) | 번쩍임 머티리얼을 만들어 ViewAssets와 프리팹(플레이어·손·슬롯)에 붙이고, Hud에 HitEdge가 없으면 만든다 | 프리팹 머티리얼만, 씬은 없을 때만 추가 |
 | Build WebGL | WebGL 빌드(Gzip, Fallback 끔, 960x600, 스플래시 끔) | 아니오 |
 
