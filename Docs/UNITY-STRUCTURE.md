@@ -16,7 +16,10 @@
 | 예고 칸, 소환 탄, 떠오르는 글자 모양 | `Assets/Prefabs/Fx/WarningCell`, `Bullet`, `FloatText` |
 | 화면 글자(HP 칸, 페이즈, 손 HP, 목표 단어 판, 슬롯 안내, 토스트, 배너)의 위치·문구·색 | `Main` 씬 > `Hud` > `Content` 아래 오브젝트 |
 | 시작·일시정지·쓰러짐·클리어·승리 화면 문구·배치 | `Main` 씬 > `Screens` 아래 패널(평소에는 Title만 켜져 있음. 고칠 때 잠깐 켜기) |
-| 화면 흔들림 세기, 마법이 날아가는 비율·궤적 배율, 연출 프리팹 연결 | `Main` 씬 > `Game` > `GameRenderer` |
+| 타격감 세기(멈춤·흔들림·번쩍임·납작해짐·넉백·조각 수·소리 크기와 높이), 상황별(플레이어 피격·사망, 마법·콤보·80%·마무리, 블록 금·깨짐, 내려치기), 흔들림·번쩍임 전체 배율 | `Assets/Data/AttackPatterns.asset` > `Hit Feel` |
+| 흔들림 진동 빠르기·옆 떨림, 조각 퍼짐·속도·중력, 마법이 날아가는 비율·궤적 배율, 연출 프리팹 연결 | `Main` 씬 > `Game` > `GameRenderer` |
+| 빨간 화면 테두리(두께·투명도, HP 1일 때 뛰는 빠르기) | `Main` 씬 > `Hud` > `HitEdge` |
+| 하얀 번쩍임 머티리얼 | `Assets/Art/Generated/SpriteFlash.mat`(셰이더 `Assets/Shaders/SpriteFlash.shader`), `ViewAssets`의 `Flash Material` |
 | 카메라(320x200, PPU 16, 픽셀 퍼펙트) | `Main` 씬 > `Main Camera` |
 
 - 글자(`PixelText`)는 5x7 도트 글꼴이라 **영어 대문자·숫자·기호**만 나온다(`0-9 + - ! ? : / % × → ← ↑ ↓ ⇧`, 마침표). 문구의 `{0}`, `{1}`은 코드가 값을 채우는 자리다(툴팁에 무엇이 들어가는지 적혀 있음).
@@ -30,6 +33,7 @@
 | 예고 칸, 소환 탄, 떠오르는 글자 | 개수·위치가 공격마다 다름 → 프리팹을 풀에서 꺼내 씀 | Fx 프리팹 |
 | 줄 돌리기 잔상·화살표, 단어 자리 점선, 조준선, 드래그 사각형, 순간이동 고리, 맞춤 번쩍임 | 모양(길이·각도·크기)이 매 프레임 계산됨 → 즉시 그리기 캔버스(`Canvas_*`) | 색은 ViewAssets |
 | 마법 연출(불덩이, 번개, 광선 등) | 궤적·입자 수가 마법마다·프레임마다 다름 | 스프라이트는 `Assets/Art/Fx`, 색·크기·개수는 AttackPatterns의 spells, 비율은 GameRenderer |
+| 타격감 조각, 번쩍임 값, 넉백·납작해짐 | 맞을 때마다 위치·방향이 다름. 값은 `GameSession.Feel`(HitFeedback)이 정하고 View가 읽음 | 세기는 AttackPatterns의 Hit Feel, 퍼짐은 GameRenderer |
 | 글자·9-slice 조각·HP 칸 스프라이트 | 문구·길이·칸 수에 따라 바뀜(숨은 자식으로 만들고 씬에 저장하지 않음) | PixelText / NineSliceSprite / CountRowView 인스펙터 |
 
 ## 3. Tools > Shift Magic Spell 메뉴
@@ -41,6 +45,7 @@
 | Create View Assets (keeps edits) | 흰 점·그림자·테두리 PNG와 ViewAssets가 없으면 만듦 | 아니오 |
 | Import Prototype Data (overwrites asset values) | 웹 JSON으로 수치·배치 에셋을 덮어씀(확인 창) | **예** |
 | Recreate Main Scene (overwrites scene edits) | 씬을 처음 상태로 다시 만듦(확인 창). 수치 에셋·프리팹은 있으면 그대로 | **씬만** |
+| Add Hit Feedback To Main Scene (keeps edits) | 번쩍임 머티리얼을 만들어 ViewAssets와 프리팹(플레이어·손·슬롯)에 붙이고, Hud에 HitEdge가 없으면 만든다 | 프리팹 머티리얼만, 씬은 없을 때만 추가 |
 | Build WebGL | WebGL 빌드(Gzip, Fallback 끔, 960x600, 스플래시 끔) | 아니오 |
 
 ## 4. 코드 구조
