@@ -25,6 +25,9 @@
 | `Warp.wav` | Jump | 0.28초 | 순간이동 |
 | `Fanfare.wav` | Powerup | 1.25초 | 페이즈 클리어, 승리(낮고 느리게) |
 | `Death.wav` | Hit/hurt | 0.93초 | 쓰러짐 |
+| `Crack.wav` | Explosion | 0.15초 | 엔딩: 손에 금이 감(두 번째는 낮고 크게). 2026-11-25 |
+| `Pop.wav` | Powerup | 0.20초 | 엔딩: 커서 모양이 펑 바뀜(모래시계 → I → 화살표로 갈수록 높게). 2026-11-25 |
+| `Zip.wav` | Jump | 0.27초 | 엔딩: 작은 화살표가 화면 밖으로 달아남. 2026-11-25 |
 
 ## 바꾼 값
 
@@ -45,7 +48,10 @@
   "Click":     {"wave_type":0,"p_duty":0.55,"p_base_freq":0.7,"p_freq_ramp":-0.38,"p_env_sustain":0.04,"p_env_decay":0.1,"p_hpf_freq":0.6},
   "Warp":      {"wave_type":0,"p_duty":0.2,"p_base_freq":0.25,"p_freq_ramp":0.3,"p_vib_strength":0.35,"p_vib_speed":0.6,"p_env_sustain":0.25,"p_env_decay":0.25},
   "Fanfare":   {"wave_type":0,"p_duty":0.4,"p_base_freq":0.3,"p_freq_ramp":0.12,"p_arp_mod":0.45,"p_arp_speed":0.6,"p_repeat_speed":0.45,"p_env_sustain":0.5,"p_env_punch":0.3,"p_env_decay":0.55},
-  "Death":     {"wave_type":0,"p_duty":0.5,"p_base_freq":0.4,"p_freq_ramp":-0.22,"p_vib_strength":0.3,"p_vib_speed":0.45,"p_env_sustain":0.4,"p_env_decay":0.5,"p_lpf_freq":0.8}
+  "Death":     {"wave_type":0,"p_duty":0.5,"p_base_freq":0.4,"p_freq_ramp":-0.22,"p_vib_strength":0.3,"p_vib_speed":0.45,"p_env_sustain":0.4,"p_env_decay":0.5,"p_lpf_freq":0.8},
+  "Crack":     {"wave_type":3,"p_base_freq":0.55,"p_freq_ramp":-0.3,"p_env_sustain":0.06,"p_env_punch":0.8,"p_env_decay":0.25,"p_hpf_freq":0.2},
+  "Pop":       {"wave_type":0,"p_duty":0.3,"p_base_freq":0.35,"p_freq_ramp":0.3,"p_env_sustain":0.1,"p_env_punch":0.5,"p_env_decay":0.28,"p_hpf_freq":0.05},
+  "Zip":       {"wave_type":0,"p_duty":0.2,"p_base_freq":0.22,"p_freq_ramp":0.4,"p_env_attack":0.05,"p_env_sustain":0.2,"p_env_decay":0.28,"p_hpf_freq":0.1,"p_pha_offset":0.15,"p_pha_ramp":0.1}
 }
 ```
 
@@ -69,5 +75,8 @@
 | Warp | https://sfxr.me/#1111111UE2QmoXVJyEhkSLeDZLbNysccLBNxp4GejfWY6cHuZCKoF8SJjmxmMK6Zr572Cv3bZNZS7X8oToirVoXYaSduJsynyFBzK2D6jTfDf7d8EYcYskK |
 | Fanfare | https://sfxr.me/#1111111144RNXH8ru8nnY3QExQjHvNjebkxccrzimCsv9avNrB3Zm2XRTYaA8LJxsR3KCzueBPNR1HDyy1KG1zeH6vX38MaNiSA1m8EJi3wP5ywFKokRGhd |
 | Death | https://sfxr.me/#11111Fc13SdX6aXTZbZ5RDu1oyFkjq7n32tW4iToEvsW1nNbUtEzkGZtHbWKXFq9tC2oerxJQ41opZQX9J8yQRap8bE5xKiMQzHrb7uYwdiY62GSmsp38Swh |
+| Crack | https://sfxr.me/#7BMHBGL5rZbg8FVXPWrK6dn22FxFcJDh7XygAWwHYoawnojcBqKVch2mqT13AYEwPgjBH2DA9inYAu4j8NFnTVBsn2tfhvCbR4U8GqX5F3aCDjMzwoGVUwdGj |
+| Pop | https://sfxr.me/#11111Fc13SajJH6VKEJ4rJ7PBah2vdECuGo667iMjNzcmDorkGEmoKr4m7wzL1JEx2hgHfG6oioL9K4aJ8RWfgETVqpTwFLAM1VDNc4wtS8XzwTWQSHfX9zf |
+| Zip | https://sfxr.me/#12eZRSDW9BMoj7LS8XKaH2VCTTfkK65fqwRsrfYjD4rN2MWGXwEK32E2xMg1FS2pfDhCMGffbMYGRuwGnBfWjiCuR2yLBdHmazj41beSfzhGMr9xMgVp1Qke9M |
 
 - 볼륨·피치·피치 랜덤폭은 wav가 아니라 `Assets/Audio/SoundLibrary.asset`(인스펙터)에서 이벤트마다 정한다.
