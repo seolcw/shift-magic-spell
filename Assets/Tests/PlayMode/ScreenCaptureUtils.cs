@@ -15,6 +15,12 @@ namespace ShiftMagicSpell.Tests
 
         public static string Capture(string fileName)
         {
+            return CaptureTo(OUTPUT_DIR, fileName, SCALE);
+        }
+
+        /// <summary>폴더와 배율을 정해 남긴다(영상 녹화는 배율 1로 빨리 찍고 나중에 키운다)</summary>
+        public static string CaptureTo(string directory, string fileName, int scale = 1)
+        {
             Camera camera = Camera.main;
             PixelPerfectCamera pixelPerfect = camera.GetComponent<PixelPerfectCamera>();
             bool wasEnabled = pixelPerfect != null && pixelPerfect.enabled;
@@ -41,17 +47,25 @@ namespace ShiftMagicSpell.Tests
                 pixelPerfect.enabled = wasEnabled;
             }
 
-            var large = new Texture2D(320 * SCALE, 200 * SCALE, TextureFormat.RGB24, false);
-            for (int y = 0; y < 200 * SCALE; y++)
+            Directory.CreateDirectory(directory);
+            string path = Path.Combine(directory, fileName + ".png");
+            if (scale <= 1)
             {
-                for (int x = 0; x < 320 * SCALE; x++)
+                File.WriteAllBytes(path, small.EncodeToPNG());
+                Object.Destroy(target);
+                Object.Destroy(small);
+                return path;
+            }
+
+            var large = new Texture2D(320 * scale, 200 * scale, TextureFormat.RGB24, false);
+            for (int y = 0; y < 200 * scale; y++)
+            {
+                for (int x = 0; x < 320 * scale; x++)
                 {
-                    large.SetPixel(x, y, small.GetPixel(x / SCALE, y / SCALE));
+                    large.SetPixel(x, y, small.GetPixel(x / scale, y / scale));
                 }
             }
 
-            Directory.CreateDirectory(OUTPUT_DIR);
-            string path = Path.Combine(OUTPUT_DIR, fileName + ".png");
             File.WriteAllBytes(path, large.EncodeToPNG());
             Object.Destroy(target);
             Object.Destroy(small);

@@ -33,6 +33,9 @@ namespace ShiftMagicSpell.Audio
         /// <summary>소리 재생을 요청할 때마다(클립이 없거나 음소거여도) 불린다. 테스트와 디버그용.</summary>
         public event Action<SoundKey> OnSoundRequested;
 
+        /// <summary>실제로 소리를 냈을 때(최소 간격으로 걸러진 뒤) 클립·최종 크기·높이와 함께 불린다. 영상 녹화(소리 다시 섞기)용.</summary>
+        public event Action<SoundKey, AudioClip, float, float> OnSoundPlayed;
+
         public SoundLibrary Library => _library;
         public bool IsMuted { get; private set; }
         /// <summary>배경음을 틀었는가(오디오가 꺼진 배치 모드에서도 판단할 수 있게 재생 요청 기준)</summary>
@@ -108,6 +111,7 @@ namespace ShiftMagicSpell.Audio
             source.volume = Mathf.Clamp01(entry.Volume * _library.SfxVolume * volumeMul);
             source.pitch = entry.Pitch * pitchMul * (1f + UnityEngine.Random.Range(-entry.PitchJitter, entry.PitchJitter));
             source.Play();
+            OnSoundPlayed?.Invoke(key, entry.Clip, source.volume, source.pitch);
         }
 
         public void SetMuted(bool isMuted)
