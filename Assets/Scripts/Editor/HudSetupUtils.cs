@@ -115,17 +115,7 @@ namespace ShiftMagicSpell.Editor
             ScreensView screens = root.AddComponent<ScreensView>();
 
             GameObject title = Panel(root, "Title", "SHIFT MAGIC SPELL", "CLICK TO START", colors.Text);
-            string[] help =
-            {
-                "MOVE: WASD / ↑↓←→",
-                "SHIFT + ↑↓←→: ROTATE YOUR ROW / COLUMN",
-                "LINE UP THE WORD IN ONE ROW OR COLUMN",
-                "SPACE ON A SLOT: CAST   P: PAUSE   R: RESTART",
-            };
-            for (int i = 0; i < help.Length; i++)
-            {
-                AddText(title, $"Help{i + 1}", help[i], CENTER_X, 120f + i * 11f, colors.Dim, TextAlign.Center, order: RenderOrderUtils.SCREEN_PANEL + 2);
-            }
+            BuildTitleLogo(screens, title);
 
             PixelText version = AddText(title, "Version", "VERSION", 316f, 190f, colors.Dim.WithAlpha(0.6f), TextAlign.Right, order: RenderOrderUtils.SCREEN_PANEL + 2);
 
@@ -191,6 +181,52 @@ namespace ShiftMagicSpell.Editor
             {
                 panel.SetActive(false);
             }
+        }
+
+        /// <summary>
+        /// 첫 화면을 키캡 로고 연출로 바꾼다: 글자 제목·부제목은 끄고(로고가 CLICK TO START까지 그림),
+        /// 조작법은 화면 아래 흐린 두 줄로 줄인다. 로고 캔버스는 덮개보다 앞 순서.
+        /// </summary>
+        public static TitleLogoView BuildTitleLogo(ScreensView screens, GameObject title)
+        {
+            ViewColors colors = ViewAssets.Instance.Colors;
+            foreach (string oldName in new[] { "TitleText", "Subtitle" })
+            {
+                Transform old = title.transform.Find(oldName);
+                if (old != null)
+                {
+                    old.gameObject.SetActive(false);
+                }
+            }
+
+            for (int i = 1; i <= 4; i++)
+            {
+                Transform oldHelp = title.transform.Find($"Help{i}");
+                if (oldHelp != null)
+                {
+                    Object.DestroyImmediate(oldHelp.gameObject);
+                }
+            }
+
+            string[] help =
+            {
+                "MOVE: WASD/↑↓←→   SHIFT+↑↓←→: ROTATE ROW/COLUMN",
+                "LINE UP THE WORD  SPACE ON SLOT: CAST  P: PAUSE",
+            };
+            for (int i = 0; i < help.Length; i++)
+            {
+                AddText(title, $"Help{i + 1}", help[i], CENTER_X, 168f + i * 10f, colors.Dim, TextAlign.Center, order: RenderOrderUtils.SCREEN_PANEL + 2);
+            }
+
+            var logoObject = new GameObject("Logo");
+            logoObject.transform.SetParent(title.transform, false);
+            logoObject.transform.position = Vector3.zero;
+            PixelCanvas canvas = logoObject.AddComponent<PixelCanvas>();
+            PrefabSetupUtils.SetInt(canvas, "_baseSortingOrder", RenderOrderUtils.SCREEN_PANEL + 10);
+            TitleLogoView logo = logoObject.AddComponent<TitleLogoView>();
+            PrefabSetupUtils.SetRefs(logo, ("_canvas", canvas));
+            PrefabSetupUtils.SetRefs(screens, ("_titleLogo", logo));
+            return logo;
         }
 
         // 화면 가운데 판(Ui/Panel 9-slice) + 큰 제목 + 부제목. 판 뒤의 새 판(키보드)이 보이게 덮개는 없다.

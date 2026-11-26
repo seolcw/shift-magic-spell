@@ -10,6 +10,8 @@ namespace ShiftMagicSpell.View
     public class ScreensView : MonoBehaviour
     {
         [SerializeField] private GameObject _title;
+        [Tooltip("첫 화면 키캡 로고 연출(제목 줄이 밀려 맞춰짐, CLICK TO START 포함)")]
+        [SerializeField] private TitleLogoView _titleLogo;
         [Tooltip("첫 화면 오른쪽 아래 버전 글자")]
         [SerializeField] private PixelText _version;
         [SerializeField] private GameObject _paused;
@@ -65,6 +67,11 @@ namespace ShiftMagicSpell.View
             bool isWin = game.State == GameState.Win && game.StateT >= game.Data.Ending.EndAt + _winShowAfterEnding;
             bool isEndingCaption = game.State == GameState.Win && !isWin && game.EndingCaptionLength > 0;
             SetActive(_title, game.State == GameState.Ready);
+            if (game.State == GameState.Ready && _titleLogo != null && _titleLogo.isActiveAndEnabled)
+            {
+                _titleLogo.Render(Time.deltaTime);
+            }
+
             SetActive(_paused, game.IsPaused && game.State != GameState.Ready);
             SetActive(_dead, game.State == GameState.Dead);
             SetActive(_phaseClear, isPhaseClear);
