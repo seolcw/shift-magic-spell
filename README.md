@@ -1,11 +1,15 @@
 # Shift Magic Spell
 
+![Title screen: scrambled keycaps shift into SHIFT and MAGIC SPELL](Docs/Media/title.gif)
+
+**[▶ Play in your browser on itch.io](https://seolcw.itch.io/shift-magic-spell)**
+
 A giant mouse cursor is attacking you on top of two keyboards.
 You fight back with the **Shift** key: rotate the row or column you are standing on, line up a spell word like `FIRE` or `MAGIC`, and blast the cursor with it. The final blow is spelled **SHIFT**.
 
 Made for **GitHub Game Off 2026** (theme: **SHIFT**).
 
-- Play: _itch.io link coming soon_ (WebGL, runs in the browser)
+- Play: [seolcw.itch.io/shift-magic-spell](https://seolcw.itch.io/shift-magic-spell) (WebGL, runs in the browser)
 - Engine: Unity 6000.0.58f2, 2D (Built-in), WebGL, 320x200 pixel art scaled 3x to 960x600
 
 ## How to play
@@ -19,6 +23,8 @@ Made for **GitHub Game Off 2026** (theme: **SHIFT**).
 | R | Restart the current phase |
 | M | Mute / unmute |
 | Space / Enter / Click | Skip the ending scene |
+
+![Gameplay: Shift + arrow keys rotate a whole row or column of keys](Docs/Media/gameplay.gif)
 
 1. **Line up the word.** The target word (top of the screen) must be spelled in one row (left → right) or one column (top → bottom). Letters never change; only their positions shift. Letter positions flash every few seconds, so keep moving and watch.
 2. **Store it.** A finished word becomes a spell block in an attack slot on the **other** keyboard.
@@ -36,6 +42,8 @@ The first word (`FIRE`) is a practice round: the cursor does not attack until yo
 - **A title screen that shifts.** The scrambled keycaps of SHIFT and MAGIC SPELL slide one key at a time into place, light up, and a fireball knocks the cursor away before CLICK TO START.
 - **Game feel on every hit.** A short hit-stop (inputs pressed during it are kept, not dropped), a white flash on whoever got hit, screen shake in the direction of the hit, knockback and squash, flying debris, a red screen edge when you are hurt (it pulses at 1 HP), and heavier sounds for bigger hits. All strengths live in `AttackPatterns.asset > Hit Feel`, including global shake and flash multipliers.
 - **An ending.** After the final SHIFT, the giant cursor cracks, flips through an hourglass and a text I-beam, shrinks into a tiny arrow, and runs off screen. It was just a stuck cursor.
+
+  ![Ending: the giant cursor cracks, shrinks into a tiny arrow, and runs away](Docs/Media/ending.gif)
 
 ## Building
 
