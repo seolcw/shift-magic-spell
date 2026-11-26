@@ -33,6 +33,7 @@ The first word (`FIRE`) is a practice round: the cursor does not attack until yo
 - **Shift is the verb.** Every move that matters rotates a row or column of keys (Loopover-style). The cursor shoves rows too, so the board is always shifting under you.
 - **Two keyboards, one loop.** Words finished on one keyboard are cast from the other, so you keep teleporting through the blue Shift keys.
 - **17 spell words, 10 spell effects.** Fireballs, lightning, lasers, gusts, stars, ice shards, blades, a rocket and a dragon's breath.
+- **A title screen that shifts.** The scrambled keycaps of SHIFT and MAGIC SPELL slide one key at a time into place, light up, and a fireball knocks the cursor away before CLICK TO START.
 - **Game feel on every hit.** A short hit-stop (inputs pressed during it are kept, not dropped), a white flash on whoever got hit, screen shake in the direction of the hit, knockback and squash, flying debris, a red screen edge when you are hurt (it pulses at 1 HP), and heavier sounds for bigger hits. All strengths live in `AttackPatterns.asset > Hit Feel`, including global shake and flash multipliers.
 - **An ending.** After the final SHIFT, the giant cursor cracks, flips through an hourglass and a text I-beam, shrinks into a tiny arrow, and runs off screen. It was just a stuck cursor.
 
@@ -50,7 +51,7 @@ The first word (`FIRE`) is a practice round: the cursor does not attack until yo
    - The custom template `Assets/WebGLTemplates/ShiftMagicSpell` shows only the 960x600 canvas (no footer, no scroll bars).
 4. itch.io: zip the build folder so `index.html` is at the top of the zip, upload it as an HTML game, set the embed size to **960 x 600**, and turn on itch.io's **Fullscreen button** (the game itself has no fullscreen button; the canvas scales to fit when the frame gets larger).
 
-Tests: PlayMode tests in `Assets/Tests/PlayMode` (rules, bot playthroughs, input, sound, hit feedback, ending, screen captures; 74 tests). Run them with the Unity Test Runner or in batch mode (`-runTests -testPlatform PlayMode`) with the editor closed. Screen captures are written to `Logs/Screens/`.
+Tests: PlayMode tests in `Assets/Tests/PlayMode` (rules, bot playthroughs, input, sound, hit feedback, ending, screen captures, title screen; 78 tests plus 1 explicit video recording). Run them with the Unity Test Runner or in batch mode (`-runTests -testPlatform PlayMode`) with the editor closed. Screen captures are written to `Logs/Screens/`.
 
 Recording the ending as a video: run the explicit test `ShiftMagicSpell.Tests.EndingVideoRecordTests.RecordEndingFrames` (`-testFilter`). It saves 30 fps frames and a log of every sound actually played to `Logs/Video/ending/`; combine them with ffmpeg (frames scaled 3x with nearest-neighbor, each sound delayed to its frame with the logged volume and pitch).
 
